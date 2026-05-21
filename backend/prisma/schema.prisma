@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEDICO
+  RECEPCIONISTA
+  ENFERMEIRO
+}
+
+enum ConsultaStatus {
+  AGENDADA
+  CONFIRMADA
+  CANCELADA
+  CHEGOU
+  TRIAGEM
+  AGUARDANDO_MEDICO
+  EM_ATENDIMENTO
+  FINALIZADA
+}
+
+model User {
+  id          String   @id @default(cuid())
+  nome        String
+  email       String   @unique
+  senha_hash  String
+  papel       Role
+  created_at  DateTime @default(now())
+  medico      Medico?
+  refreshTokens RefreshToken[]
+}
+
+model Medico {
+  id                String  @id @default(cuid())
+  user              User    @relation(fields: [userId], references: [id])
+  userId            String  @unique
+  especialidade     String
+  crm               String
+  percentual_repasse Float
+  consultas         Consulta[]
+  prontuarios       Prontuario[]
+}
+
+model Paciente {
+  id                    String   @id @default(cuid())
+  nome                  String
+  data_nascimento       DateTime
+  cpf                   String   @unique
+  telefone              String?
+  email                 String?
+  historico_faltas_count Int     @default(0)
+  consultas             Consulta[]
+  prontuarios           Prontuario[]
+}
+
+model Consulta {
+  id            String          @id @default(cuid())
+  paciente      Paciente        @relation(fields: [pacienteId], references: [id])
+  pacienteId    String
+  medico        Medico          @relation(fields: [medicoId], references: [id])
+  medicoId      String
+  data_hora     DateTime
+  status        ConsultaStatus  @default(AGENDADA)
+  tipo_atendimento String
+  valor         Float
+  pago          Boolean        @default(false)
+  created_at    DateTime       @default(now())
+  compareceu    Boolean?
+  prontuario    Prontuario?
+  registro      RegistroFinanceiro?
+  notificacoes  Notificacao[]
+  @@index([medicoId, data_hora])
+}
+
+model Prontuario {
+  id                 String   @id @default(cuid())
+  consulta           Consulta @relation(fields: [consultaId], references: [id])
+  consultaId         String   @unique
+  paciente           Paciente @relation(fields: [pacienteId], references: [id])
+  pacienteId         String
+  medico             Medico   @relation(fields: [medicoId], references: [id])
+  medicoId           String
+  conteudo_json      Json
+  especialidade_modelo String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  last_autosave_at   DateTime?
+  prescricoes        Prescricao[]
+}
+
+model ModeloProntuario {
+  id             String   @id @default(cuid())
+  especialidade  String
+  nome           String
+  estrutura_json Json
+  created_at     DateTime @default(now())
+}
+
+model Prescricao {
+  id           String   @id @default(cuid())
+  prontuario   Prontuario @relation(fields: [prontuarioId], references: [id])
+  prontuarioId String
+  conteudo     String
+  created_at   DateTime @default(now())
+}
+
+model RegistroFinanceiro {
+  id                   String   @id @default(cuid())
+  consulta             Consulta @relation(fields: [consultaId], references: [id])
+  consultaId           String   @unique
+  valor_total          Float
+  tipo_atendimento     String
+  pago                 Boolean  @default(false)
+  valor_repasse_medico Float
+  created_at           DateTime @default(now())
+}
+
+// Additional model to store refresh tokens for invalidation
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Notificacao {
+  id          String   @id @default(cuid())
+  consulta    Consulta? @relation(fields: [consultaId], references: [id])
+  consultaId  String?
+  tipo        String
+  mensagem    String
+  enviada_em  DateTime?
+  status      String   @default("PENDING")
+}
+
+
