@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import debounce from 'lodash.debounce'
+import { apiFetch } from '../lib/api'
 
 function renderField(key: string, value: any, onChange: (k:string,v:any)=>void) {
   return (
@@ -21,12 +22,12 @@ export default function ProntuarioEditor() {
   const [prontuarioId, setProntuarioId] = useState<string | null>(null)
   const retryRef = useRef<number | null>(null)
 
-  useEffect(()=>{ fetch('/api/modelos-prontuario').then(r=>r.json()).then(setModelos) }, [])
+  useEffect(()=>{ apiFetch('/api/modelos-prontuario').then(r=>r.json()).then(setModelos) }, [])
 
   const doAutosave = useCallback(debounce(async (id:string, content:any)=>{
     try {
       setSaving(true)
-      const res = await fetch(`/api/prontuarios/${id}/autosave`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(content) })
+      const res = await apiFetch(`/api/prontuarios/${id}/autosave`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(content) })
       if (!res.ok) throw new Error('fail')
       setStatusMsg('Salvo automaticamente às ' + new Date().toLocaleTimeString())
       setSaving(false)
@@ -44,10 +45,10 @@ export default function ProntuarioEditor() {
   async function handleStart() {
     // create prontuario for the consulta
     // fetch consulta to get medicoId and pacienteId
-    const resp = await fetch(`/api/consultas?`) // simplified; assume frontend provides ids
+    const resp = await apiFetch(`/api/consultas?`) // simplified; assume frontend provides ids
     // For demo, create with placeholders
     const body = { consultaId, pacienteId: 'placeholder-paciente', medicoId: 'placeholder-medico', conteudo_json: conteudo, especialidade_modelo: modelo?.especialidade }
-    const r = await fetch('/api/prontuarios', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
+    const r = await apiFetch('/api/prontuarios', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
     const data = await r.json()
     setProntuarioId(data.id)
   }
@@ -61,7 +62,7 @@ export default function ProntuarioEditor() {
   async function handleSave() {
     if (!prontuarioId) return
     setSaving(true)
-    await fetch(`/api/prontuarios/${prontuarioId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ conteudo_json: conteudo }) })
+    await apiFetch(`/api/prontuarios/${prontuarioId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ conteudo_json: conteudo }) })
     setSaving(false)
     setStatusMsg('Salvo manualmente às ' + new Date().toLocaleTimeString())
   }

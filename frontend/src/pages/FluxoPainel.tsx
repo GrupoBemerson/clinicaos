@@ -3,6 +3,7 @@ import { DndContext, useSensor, useSensors, PointerSensor, DragEndEvent } from '
 import useClinicSocket from '../hooks/useClinicSocket'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { apiFetch } from '../lib/api'
 
 const order = ['CHEGOU','TRIAGEM','AGUARDANDO_MEDICO','EM_ATENDIMENTO','FINALIZADA']
 
@@ -15,7 +16,7 @@ export default function FluxoPainel() {
   const [wsState, setWsState] = useState(false)
 
   async function load() {
-    const res = await fetch('/api/consultas/hoje')
+    const res = await apiFetch('/api/consultas/hoje')
     const rows = await res.json()
     const grouped: any = {}
     order.forEach(s=>grouped[s]=[])
@@ -43,7 +44,7 @@ export default function FluxoPainel() {
     const newStatus = over.id as string
     const confirmed = window.confirm('Confirmar mudança de status?')
     if (!confirmed) return
-    fetch(`/api/consultas/${id}/status`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status: newStatus }) })
+    apiFetch(`/api/consultas/${id}/status`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ status: newStatus }) })
       .then(res => { if (!res.ok) throw new Error('Erro'); load() })
       .catch(()=> toast.error('Erro ao atualizar status'))
   }

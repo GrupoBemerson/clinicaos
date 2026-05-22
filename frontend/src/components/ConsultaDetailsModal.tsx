@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { apiFetch } from '../lib/api'
 
 export default function DetailsModal({ consulta, onClose }: { consulta: any, onClose: () => void }) {
   const [loading, setLoading] = useState(false)
@@ -8,7 +9,7 @@ export default function DetailsModal({ consulta, onClose }: { consulta: any, onC
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/consultas/${consulta.id}/presenca`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ compareceu }) })
+      const res = await apiFetch(`/api/consultas/${consulta.id}/presenca`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ compareceu }) })
       if (!res.ok) { const b = await res.json(); setError(b.error || 'Erro'); setLoading(false); return }
       onClose()
     } catch (e) { setError('Erro'); }
@@ -18,7 +19,7 @@ export default function DetailsModal({ consulta, onClose }: { consulta: any, onC
   async function cancelar() {
     setLoading(true)
     try {
-      await fetch(`/api/consultas/${consulta.id}`, { method: 'DELETE' })
+      await apiFetch(`/api/consultas/${consulta.id}`, { method: 'DELETE' })
       onClose()
     } catch (e) { setError('Erro'); }
     setLoading(false)

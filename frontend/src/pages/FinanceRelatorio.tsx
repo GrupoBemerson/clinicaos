@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { apiFetch } from '../lib/api'
 
 export default function FinanceRelatorio() {
   const [mes, setMes] = useState(() => {
@@ -8,7 +9,7 @@ export default function FinanceRelatorio() {
   const [data, setData] = useState<any>(null)
 
   async function load() {
-    const res = await fetch(`/api/financeiro/relatorio?mes=${mes}`)
+    const res = await apiFetch(`/api/financeiro/relatorio?mes=${mes}`)
     const json = await res.json()
     setData(json)
   }

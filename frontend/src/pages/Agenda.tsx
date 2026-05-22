@@ -4,6 +4,7 @@ import moment from 'moment'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import ScheduleModal from '../components/ScheduleModal'
 import DetailsModal from '../components/ConsultaDetailsModal'
+import { apiFetch } from '../lib/api'
 
 const localizer = momentLocalizer(moment)
 
@@ -15,7 +16,7 @@ export default function Agenda() {
 
   async function load() {
     setLoading(true)
-    const res = await fetch('/api/consultas')
+    const res = await apiFetch('/api/consultas')
     const data = await res.json()
     setEvents(data.map((c: any) => ({
       id: c.id,

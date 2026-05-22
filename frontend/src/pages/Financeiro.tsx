@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { apiFetch } from '../lib/api'
 
 export default function Financeiro() {
   const [rows, setRows] = useState<any[]>([])
@@ -11,7 +12,7 @@ export default function Financeiro() {
     const params = new URLSearchParams()
     if (dateStart) params.set('date_start', dateStart)
     if (dateEnd) params.set('date_end', dateEnd)
-    const res = await fetch('/api/financeiro?' + params.toString())
+    const res = await apiFetch('/api/financeiro?' + params.toString())
     const data = await res.json()
     setRows(data)
     setLoading(false)
@@ -20,7 +21,7 @@ export default function Financeiro() {
   useEffect(()=>{ load() }, [])
 
   async function marcarPago(id: string) {
-    await fetch(`/api/financeiro/${id}/pagamento`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pago: true }) })
+    await apiFetch(`/api/financeiro/${id}/pagamento`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pago: true }) })
     load()
   }
 

@@ -1,4 +1,5 @@
 import React, { createContext, useReducer, useEffect } from 'react'
+import { apiFetch } from '../lib/api'
 
 type User = { id: string; nome: string; email: string; papel: string }
 
@@ -41,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [state])
 
   async function login(email: string, senha: string) {
-    const resp = await fetch('/api/auth/login', {
+    const resp = await apiFetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
@@ -58,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   function logout() {
     const rt = localStorage.getItem('refreshToken')
-    if (rt) fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: rt }) })
+    if (rt) apiFetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: rt }) })
     localStorage.removeItem('refreshToken')
     dispatch({ type: 'LOGOUT' })
   }

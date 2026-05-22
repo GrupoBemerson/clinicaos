@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { apiFetch } from '../lib/api'
 
 export default function ScheduleModal({ onClose }: { onClose: () => void }) {
   const [paciente, setPaciente] = useState('')
@@ -18,7 +19,7 @@ export default function ScheduleModal({ onClose }: { onClose: () => void }) {
     setLoading(true)
     const data_hora = new Date(`${data}T${hora}`)
     try {
-      const res = await fetch('/api/consultas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pacienteId: paciente, medicoId, data_hora, tipo_atendimento: tipo, valor: Number(valor) }) })
+      const res = await apiFetch('/api/consultas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pacienteId: paciente, medicoId, data_hora, tipo_atendimento: tipo, valor: Number(valor) }) })
       if (res.status === 409) {
         setError('Conflito de horário: escolha outro horário')
         setLoading(false)

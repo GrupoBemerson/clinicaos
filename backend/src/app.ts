@@ -11,7 +11,8 @@ import prescricaoRoutes from './routes/prescricaoRoutes';
 
 const app = express();
 
-app.use(cors());
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173'
+app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 
 app.use('/auth', authRoutes);
